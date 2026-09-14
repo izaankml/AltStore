@@ -29,5 +29,7 @@ xcuserdata
 ## Obj-C/Swift specific
 *.hmap
 
-## Packaged builds (local fork only)
+## Packaged builds, run logs, and per-target derived data (local fork only)
 ipa/
+logs/
+build-*/

@@ -98,9 +98,11 @@ extension ServerManager
                 }
                 else
                 {
+                    let listenerState = self.connectionListener.map { String(describing: $0.state) } ?? "none"
+                    Logger.sideload.error("Timed out waiting for the wired AltServer to connect. Listener state: \(listenerState, privacy: .public)")
                     finish(.failure(ALTServerError(.connectionFailed)))
                 }
-                
+
             case .wireless:
                 guard let service = server.service else { return finish(.failure(ALTServerError(.connectionFailed))) }
                 
@@ -135,10 +137,11 @@ private extension ServerManager
         listener.stateUpdateHandler = { (state) in
             switch state
             {
-            case .ready: break
-            case .waiting, .setup: print("Listener socket waiting...")
-            case .cancelled: print("Listener socket cancelled.")
-            case .failed(let error): print("Listener socket failed:", error)
+            case .ready: Logger.sideload.notice("Wired listener ready on port \(ALTDeviceListeningSocket).")
+            case .waiting(let error): Logger.sideload.error("Wired listener waiting. \(error.localizedDescription, privacy: .public)")
+            case .setup: break
+            case .cancelled: Logger.sideload.notice("Wired listener cancelled.")
+            case .failed(let error): Logger.sideload.error("Wired listener failed. \(error.localizedDescription, privacy: .public)")
             @unknown default: break
             }
         }

@@ -102,6 +102,9 @@ class FetchAnisetteDataOperation: ResultOperation<ALTAnisetteData>, @unchecked S
                 else if let server = self.context.server
                 {
                     anisetteData = try await self.fetchAnisetteData(fromAltServer: server)
+
+                    // AltServer doesn't send its anisette provider's User-Agent, so use AltSign's default.
+                    ALTAppleAPI.shared.authenticationUserAgent = nil
                 }
                 else
                 {
@@ -278,6 +281,9 @@ private extension FetchAnisetteDataOperation
         }
 
         let (machineID, oneTimePassword, routingInfo) = try await self.fetchHeaders(from: serverURL, identity: identity, adiPB: adiPB, sim: sim)
+
+        // GrandSlam rejects sign-ins whose User-Agent doesn't match the client that generated the anisette data.
+        ALTAppleAPI.shared.authenticationUserAgent = response.userAgent
 
         // 4. Construct & return ALTAnisetteData
         return ALTAnisetteData(
